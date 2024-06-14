@@ -1,0 +1,9 @@
+aws:
+  region: us-east-1
+  authentication:
+    profile:
+      name:
+      path:
+    credentials:
+      access_key:
+      secret_key:
