@@ -2,25 +2,29 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/loureirovinicius/cleanup/cmd/cleaner"
 	"github.com/loureirovinicius/cleanup/cmd/cli"
 	"github.com/loureirovinicius/cleanup/config"
+	"github.com/loureirovinicius/cleanup/helpers/logger"
 	"github.com/loureirovinicius/cleanup/provider"
 )
 
 func main() {
-	ctx := context.TODO()
+	ctx := context.Background()
 
-	config.Start()
+	err := config.Start()
+	if err != nil {
+		logger.Log(ctx, "error", err.Error())
+	}
 	args := cli.Start()
 
 	// Load the provider configuration
-	services := provider.LoadProvider(ctx, "aws")
+	services, err := provider.LoadProvider(ctx, "aws")
+	if err != nil {
+		logger.Log(ctx, "error", err.Error())
+	}
 
 	// Starts the Cleaner
-	res := cleaner.Run(ctx, services, args)
-
-	fmt.Println(res)
+	cleaner.Run(ctx, services, args)
 }

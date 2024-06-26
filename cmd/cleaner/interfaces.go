@@ -6,6 +6,6 @@ import (
 
 type Cleanable interface {
 	List(context.Context) []string
-	Validate(Cleanable) bool
-	Delete(string) string
+	Validate(context.Context, string) bool
+	Delete(context.Context, string) string
 }

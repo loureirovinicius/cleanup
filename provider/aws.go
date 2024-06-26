@@ -2,7 +2,8 @@ package provider
 
 import (
 	"context"
-	"log"
+	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -45,16 +46,26 @@ type Credentials struct {
 	SecretKey string
 }
 
-func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) {
-	p.loadConfig()
-	p.createClient(ctx)
+func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) error {
+	err := p.loadConfig()
+	if err != nil {
+		return fmt.Errorf("error loading AWS config. Reason: %v", err)
+	}
+
+	err = p.createClient(ctx)
+	if err != nil {
+		return fmt.Errorf("error creating new AWS client. Reason: %v", err)
+	}
+
 	p.Resources = map[string]cleaner.Cleanable{
 		"targetGroup": &targetGroup.TargetGroup{Client: p.client},
 	}
 	cfg.AWS = *p
+
+	return nil
 }
 
-func (p *AWS) createClient(ctx context.Context) {
+func (p *AWS) createClient(ctx context.Context) error {
 	credentials := credentials.NewStaticCredentialsProvider(p.config.Credentials.AccessKey, p.config.Credentials.SecretKey, "")
 
 	config, err := config.LoadDefaultConfig(ctx,
@@ -64,16 +75,18 @@ func (p *AWS) createClient(ctx context.Context) {
 		config.WithCredentialsProvider(credentials),
 	)
 	if err != nil {
-		log.Fatalf("error loading AWS configs: %v", err)
+		return err
 	}
 
 	p.client = &config
+
+	return nil
 }
 
-func (p *AWS) loadConfig() {
+func (p *AWS) loadConfig() error {
 	region := viper.GetString("aws.region")
 	if region == "" {
-		log.Fatalln("AWS region can't be empty.")
+		return errors.New("AWS region can't be empty")
 	}
 	p.config.Region = region
 
@@ -92,4 +105,6 @@ func (p *AWS) loadConfig() {
 			SecretKey: credentials["secret_key"],
 		}
 	}
+
+	return nil
 }
