@@ -29,14 +29,20 @@ aws:
 
 2. Compile it using Docker or Go:
     - Docker
+        ```bash
           docker run --rm --mount type=bind,source=$(pwd),target=/app -w /app golang:alpine go build -o cleanup cmd/main.go
+        ```
 
     - Go
+        ```bash
           go build -o cleanup ./cmd/main.go
+        ```
 
 3. Use it:
-      cleanup list --service targetGroup
-      cleanup validate --service targetGroup
-      cleanup delete --service targetGroup
+```bash
+cleanup list --service targetGroup
+cleanup validate --service targetGroup
+cleanup delete --service targetGroup
+```
 
 
