@@ -15,10 +15,10 @@ func (c *CleanerDeleteCommand) Run(ctx context.Context, service Cleanable) error
 	var value string
 
 	// Creates flag parameters for the "Validate" operation
-	validate := flag.NewFlagSet("validate", flag.ExitOnError)
-	validate.StringVar(&value, "service", "", "cloud provider service")
-	validate.StringVar(&value, "s", "", "cloud provider service")
-	validate.Parse(os.Args[2:])
+	delete := flag.NewFlagSet("delete", flag.ExitOnError)
+	delete.StringVar(&value, "service", "", "cloud provider service")
+	delete.StringVar(&value, "s", "", "cloud provider service")
+	delete.Parse(os.Args[2:])
 
 	// List all created resources for a service
 	resources, err := service.List(ctx)
