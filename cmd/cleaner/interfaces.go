@@ -5,7 +5,7 @@ import (
 )
 
 type Cleanable interface {
-	List(context.Context) []string
-	Validate(context.Context, string) bool
-	Delete(context.Context, string) string
+	List(context.Context) ([]string, error)
+	Validate(context.Context, string) (bool, error)
+	Delete(context.Context, string) error
 }

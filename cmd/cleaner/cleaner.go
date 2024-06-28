@@ -2,46 +2,55 @@ package cleaner
 
 import (
 	"context"
+	"flag"
 	"fmt"
-	"strings"
-
-	"github.com/loureirovinicius/cleanup/helpers/logger"
+	"os"
 )
 
-func Run(ctx context.Context, services map[string]Cleanable, args []string) {
-	var cmd = args[0]
-	var svcName = args[1]
+func Run(ctx context.Context, services map[string]Cleanable) error {
+	var cmd, svcName string
+
+	// Assign respective values to their variables
+	if len(os.Args) > 0 {
+		cmd, svcName = os.Args[1], os.Args[3]
+		fmt.Println(cmd, svcName)
+	}
 
 	service := services[svcName]
 
 	switch cmd {
 	case "list":
-		res := service.List(ctx)
-		val := strings.Join(res, ", ")
-		logger.Log(ctx, "info", fmt.Sprintf("resources found in account: %s", val))
+		return (&CleanerListCommand{}).Run(ctx, service)
 	case "validate":
-		resources := service.List(ctx)
-		for _, resource := range resources {
-			empty := service.Validate(ctx, resource)
-			if empty {
-				msg := fmt.Sprintf("'%v' empty, can be excluded", resource)
-				logger.Log(ctx, "info", msg)
-			} else {
-				msg := fmt.Sprintf("'%v' not empty, cannot be excluded", resource)
-				logger.Log(ctx, "info", msg)
-			}
-		}
+		return (&CleanerValidateCommand{}).Run(ctx, service)
 	case "delete":
-		resources := service.List(ctx)
-		for _, resource := range resources {
-			empty := service.Validate(ctx, resource)
-			if empty {
-				res := service.Delete(ctx, resource)
-				logger.Log(ctx, "info", res)
-				continue
-			}
-			msg := fmt.Sprintf("'%v' not empty, could not delete it", resource)
-			logger.Log(ctx, "info", msg)
-		}
+		return (&CleanerDeleteCommand{}).Run(ctx, service)
+	default:
+		usage()
+		return flag.ErrHelp
 	}
+}
+
+func usage() {
+	fmt.Print(`Cleanup is a tool for cloud providers' resources cleaning. You can quickly list, validate or delete resources from your current cloud provider vendor. The tool is being incrementally built, so the only provider currently supported is AWS with few resources.
+
+Usage:
+	cleanup <command> (--service | -service) <service_name>
+
+Commands Usage:
+	cleanup list (--service | -service) <service_name>
+
+		Options:
+			--service STRING  (required) the service name you're trying to list (these service names are available in the documentation).
+
+	cleanup validate (--service | -service) <service_name>
+
+		Options:
+			--service STRING  (required) the service name you're trying to validate (these service names are available in the documentation). Each resource has its own rules to be considered empty, so check docs to understand these rules.
+
+	cleanup delete (--service | -service) <service_name>
+
+		Options:
+			--service STRING  (required) the service name you're trying to delete (these service names are available in the documentation). A resource can only be deleted if empty, so check it first using the "validate" operation.
+	`)
 }

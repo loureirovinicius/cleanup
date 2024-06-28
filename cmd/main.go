@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/loureirovinicius/cleanup/cmd/cleaner"
-	"github.com/loureirovinicius/cleanup/cmd/cli"
 	"github.com/loureirovinicius/cleanup/config"
 	"github.com/loureirovinicius/cleanup/helpers/logger"
 	"github.com/loureirovinicius/cleanup/provider"
@@ -17,7 +16,6 @@ func main() {
 	if err != nil {
 		logger.Log(ctx, "error", err.Error())
 	}
-	args := cli.Start()
 
 	// Load the provider configuration
 	services, err := provider.LoadProvider(ctx, "aws")
@@ -26,5 +24,8 @@ func main() {
 	}
 
 	// Starts the Cleaner
-	cleaner.Run(ctx, services, args)
+	err = cleaner.Run(ctx, services)
+	if err != nil {
+		logger.Log(ctx, "error", err.Error())
+	}
 }

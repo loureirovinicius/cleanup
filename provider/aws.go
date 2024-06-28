@@ -49,12 +49,12 @@ type Credentials struct {
 func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) error {
 	err := p.loadConfig()
 	if err != nil {
-		return fmt.Errorf("error loading AWS config. Reason: %v", err)
+		return err
 	}
 
 	err = p.createClient(ctx)
 	if err != nil {
-		return fmt.Errorf("error creating new AWS client. Reason: %v", err)
+		return err
 	}
 
 	p.Resources = map[string]cleaner.Cleanable{
@@ -75,7 +75,7 @@ func (p *AWS) createClient(ctx context.Context) error {
 		config.WithCredentialsProvider(credentials),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating AWS client: %v", err)
 	}
 
 	p.client = &config
@@ -90,6 +90,7 @@ func (p *AWS) loadConfig() error {
 	}
 	p.config.Region = region
 
+	// This doesn't need to raise an error if empty because it's not a required configuration.
 	profile := viper.GetStringMapString("aws.authentication.profile")
 	if profile["name"] != "" || profile["path"] != "" {
 		p.config.Profile = Profile{
@@ -98,6 +99,7 @@ func (p *AWS) loadConfig() error {
 		}
 	}
 
+	// This doesn't need to raise an error if empty because it's not a required configuration.
 	credentials := viper.GetStringMapString("aws.authentication.credentials")
 	if credentials["access_key"] != "" && credentials["secret_key"] != "" {
 		p.config.Credentials = Credentials{
