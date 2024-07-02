@@ -13,7 +13,6 @@ func Run(ctx context.Context, services map[string]Cleanable) error {
 	// Assign respective values to their variables
 	if len(os.Args) > 0 {
 		cmd, svcName = os.Args[1], os.Args[3]
-		fmt.Println(cmd, svcName)
 	}
 
 	service := services[svcName]

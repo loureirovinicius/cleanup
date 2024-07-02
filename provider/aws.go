@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/loureirovinicius/cleanup/aws/service/loadBalancer"
 	"github.com/loureirovinicius/cleanup/aws/service/targetGroup"
 	"github.com/loureirovinicius/cleanup/cmd/cleaner"
 	"github.com/spf13/viper"
@@ -58,7 +59,8 @@ func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) error {
 	}
 
 	p.Resources = map[string]cleaner.Cleanable{
-		"targetGroup": &targetGroup.TargetGroup{Client: p.client},
+		"targetGroup":  &targetGroup.TargetGroup{Client: p.client},
+		"loadBalancer": &loadBalancer.LoadBalancer{Client: p.client},
 	}
 	cfg.AWS = *p
 

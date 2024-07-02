@@ -12,6 +12,7 @@ import (
 func main() {
 	ctx := context.Background()
 
+	// Start initialization of configuration
 	err := config.Start()
 	if err != nil {
 		logger.Log(ctx, "error", err.Error())
