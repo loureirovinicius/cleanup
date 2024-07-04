@@ -7,7 +7,9 @@ Everything can be packaged into a single binary that can run on serverless struc
 
 | Provider | Resource | Validation method |
 | -------- | -------- | ----------------- |
+| AWS | eni | Checks if ENI status is "available"
 | AWS | targetGroup | Checks if TargetGroup has no LoadBalancer attached
+| AWS | loadBalancer | Checks if LoadBalancer has no Listener attached
 
 
 ## Usage:
@@ -28,7 +30,7 @@ aws:
 ```
 
 2. Compile it using Docker or Go:
-    - Docker
+    - Docker (TBD)
         ```bash
           docker run --rm --mount type=bind,source=$(pwd),target=/app -w /app golang:alpine go build -o cleanup cmd/main.go
         ```

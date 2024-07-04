@@ -27,9 +27,9 @@ func (r *LoadBalancer) List(ctx context.Context) ([]string, error) {
 	return lbArns, nil
 }
 
-func (r *LoadBalancer) Validate(ctx context.Context, name string) (bool, error) {
+func (r *LoadBalancer) Validate(ctx context.Context, arn string) (bool, error) {
 	client := elasticloadbalancingv2.NewFromConfig(*r.Client)
-	listeners, err := client.DescribeListeners(ctx, &elasticloadbalancingv2.DescribeListenersInput{LoadBalancerArn: &name})
+	listeners, err := client.DescribeListeners(ctx, &elasticloadbalancingv2.DescribeListenersInput{LoadBalancerArn: &arn})
 	if err != nil {
 		return false, err
 	}

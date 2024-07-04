@@ -27,9 +27,9 @@ func (r *TargetGroup) List(ctx context.Context) ([]string, error) {
 	return tgArns, nil
 }
 
-func (r *TargetGroup) Validate(ctx context.Context, name string) (bool, error) {
+func (r *TargetGroup) Validate(ctx context.Context, arn string) (bool, error) {
 	client := elasticloadbalancingv2.NewFromConfig(*r.Client)
-	tgs, err := client.DescribeTargetGroups(ctx, &elasticloadbalancingv2.DescribeTargetGroupsInput{TargetGroupArns: []string{name}})
+	tgs, err := client.DescribeTargetGroups(ctx, &elasticloadbalancingv2.DescribeTargetGroupsInput{TargetGroupArns: []string{arn}})
 	if err != nil {
 		return false, err
 	}
