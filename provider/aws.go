@@ -8,9 +8,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/loureirovinicius/cleanup/aws/service/elasticNetworkInterface"
-	"github.com/loureirovinicius/cleanup/aws/service/loadBalancer"
-	"github.com/loureirovinicius/cleanup/aws/service/targetGroup"
+	"github.com/loureirovinicius/cleanup/aws/service/elasticnetworkinterface"
+	"github.com/loureirovinicius/cleanup/aws/service/loadbalancer"
+	"github.com/loureirovinicius/cleanup/aws/service/targetgroup"
 	"github.com/loureirovinicius/cleanup/cmd/cleaner"
 	"github.com/spf13/viper"
 )
@@ -60,9 +60,9 @@ func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) error {
 	}
 
 	p.Resources = map[string]cleaner.Cleanable{
-		"targetGroup":  &targetGroup.TargetGroup{Client: p.client},
-		"loadBalancer": &loadBalancer.LoadBalancer{Client: p.client},
-		"eni":          &elasticNetworkInterface.ElasticNetworkInterface{Client: p.client},
+		"targetGroup":  &targetgroup.TargetGroup{Client: p.client},
+		"loadBalancer": &loadbalancer.LoadBalancer{Client: p.client},
+		"eni":          &elasticnetworkinterface.ElasticNetworkInterface{Client: p.client},
 	}
 	cfg.AWS = *p
 

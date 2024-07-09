@@ -1,4 +1,4 @@
-package targetGroup
+package targetgroup
 
 import (
 	"context"

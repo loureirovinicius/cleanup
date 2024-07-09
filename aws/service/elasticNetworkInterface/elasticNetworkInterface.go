@@ -1,4 +1,4 @@
-package elasticNetworkInterface
+package elasticnetworkinterface
 
 import (
 	"context"
