@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	elasticip "github.com/loureirovinicius/cleanup/aws/service/elasticIp"
 	"github.com/loureirovinicius/cleanup/aws/service/elasticnetworkinterface"
 	"github.com/loureirovinicius/cleanup/aws/service/loadbalancer"
 	"github.com/loureirovinicius/cleanup/aws/service/targetgroup"
@@ -63,6 +64,7 @@ func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) error {
 		"targetGroup":  &targetgroup.TargetGroup{Client: p.client},
 		"loadBalancer": &loadbalancer.LoadBalancer{Client: p.client},
 		"eni":          &elasticnetworkinterface.ElasticNetworkInterface{Client: p.client},
+		"eip":          &elasticip.ElasticIP{Client: p.client},
 	}
 	cfg.AWS = *p
 
