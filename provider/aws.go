@@ -8,10 +8,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	elasticblockstorage "github.com/loureirovinicius/cleanup/aws/service/elasticBlockStorage"
 	elasticip "github.com/loureirovinicius/cleanup/aws/service/elasticIp"
-	"github.com/loureirovinicius/cleanup/aws/service/elasticnetworkinterface"
-	"github.com/loureirovinicius/cleanup/aws/service/loadbalancer"
-	"github.com/loureirovinicius/cleanup/aws/service/targetgroup"
+	elasticnetworkinterface "github.com/loureirovinicius/cleanup/aws/service/elasticNetworkInterface"
+	loadbalancer "github.com/loureirovinicius/cleanup/aws/service/loadBalancer"
+	targetgroup "github.com/loureirovinicius/cleanup/aws/service/targetGroup"
 	"github.com/loureirovinicius/cleanup/cmd/cleaner"
 	"github.com/spf13/viper"
 )
@@ -65,6 +66,7 @@ func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) error {
 		"loadBalancer": &loadbalancer.LoadBalancer{Client: p.client},
 		"eni":          &elasticnetworkinterface.ElasticNetworkInterface{Client: p.client},
 		"eip":          &elasticip.ElasticIP{Client: p.client},
+		"ebs":          &elasticblockstorage.ElasticBlockStorage{Client: p.client},
 	}
 	cfg.AWS = *p
 
