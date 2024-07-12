@@ -8,6 +8,8 @@ Everything can be packaged into a single binary that can run on serverless struc
 | Provider | Resource | Validation method |
 | -------- | -------- | ----------------- |
 | AWS | eni | Checks if ENI status is "available"
+| AWS | eip | Checks if EIP has an association ID
+| AWS | ebs | Checks if EBS disk has its state as "Available" and if tag "cleanup-ignore" equals to "true"
 | AWS | targetGroup | Checks if TargetGroup has no LoadBalancer attached
 | AWS | loadBalancer | Checks if LoadBalancer has no Listener attached
 
