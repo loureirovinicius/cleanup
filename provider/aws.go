@@ -4,15 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	elasticblockstorage "github.com/loureirovinicius/cleanup/aws/service/elasticBlockStorage"
-	elasticip "github.com/loureirovinicius/cleanup/aws/service/elasticIp"
-	elasticnetworkinterface "github.com/loureirovinicius/cleanup/aws/service/elasticNetworkInterface"
-	loadbalancer "github.com/loureirovinicius/cleanup/aws/service/loadBalancer"
-	targetgroup "github.com/loureirovinicius/cleanup/aws/service/targetGroup"
+	ec2internal "github.com/loureirovinicius/cleanup/aws/service/ec2"
 	"github.com/loureirovinicius/cleanup/cmd/cleaner"
 	"github.com/spf13/viper"
 )
@@ -61,13 +58,15 @@ func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) error {
 		return err
 	}
 
-	p.Resources = map[string]cleaner.Cleanable{
-		"targetGroup":  &targetgroup.TargetGroup{Client: p.client},
-		"loadBalancer": &loadbalancer.LoadBalancer{Client: p.client},
-		"eni":          &elasticnetworkinterface.ElasticNetworkInterface{Client: p.client},
-		"eip":          &elasticip.ElasticIP{Client: p.client},
-		"ebs":          &elasticblockstorage.ElasticBlockStorage{Client: p.client},
+	services := map[string]map[string]cleaner.Cleanable{
+		"ec2": ec2internal.Initialize(*p.client),
 	}
+
+	p.Resources = map[string]cleaner.Cleanable{}
+	for _, v := range services {
+		maps.Copy(p.Resources, v)
+	}
+
 	cfg.AWS = *p
 
 	return nil
