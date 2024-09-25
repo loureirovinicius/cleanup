@@ -1,0 +1,75 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build-application:
+    runs-on: ubuntu-latest
+    name: Build application
+    env:
+      TESTS_REPORTS_LOCATION: tests/reports
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+        cache-dependency-path: "**/*.sum"
+
+    - name: Display Go version
+      run: go version
+
+    - name: Install code dependencies
+      run: go get ./... 
+
+    - name: Install go-junit for test reports
+      run: |
+        export GOPATH="$HOME/go/"
+        export PATH=$PATH:$GOPATH/bin
+        go install github.com/jstemmer/go-junit-report@latest
+        mkdir -p ${{ env.TESTS_REPORTS_LOCATION }}
+        
+    - name: Run unit tests
+      run: go test -v ./... | go-junit-report -set-exit-code > ${{ env.TESTS_REPORTS_LOCATION }}/report.xml
+
+    - uses: dorny/test-reporter@v1
+      with:
+        artifact: unit-tests-results
+        name: Unit tests results 
+        path: ${{ env.TESTS_REPORTS_LOCATION }}/report.xml
+        reporter: java-junit 
+
+    - name: Test Summary
+      uses: test-summary/action@v1
+      with:
+        paths: |
+          ${{ env.TESTS_REPORTS_LOCATION }}/report.xml            
+      if: always()
+
+    - name: Generate test coverage report
+      uses: gwatts/go-coverage-action@v2
+      id: coverage
+      with:
+        # Optional coverage threshold
+        # use fail-coverage to determine what should happen below this threshold
+        coverage-threshold: 30
+
+        # collect coverage for all packages beyond the one under test
+        cover-pkg: ./...
+
+        # Ignore code-generated files when calculating coverage totals
+        ignore-pattern: |
+          \.pb\.go$
+          \_string\.go$
+
+    - name: Build code    
+      run: go build -v -o cleanup ./cmd/main.go
