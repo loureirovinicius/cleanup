@@ -11,7 +11,7 @@ on:
 
 jobs:
 
-  setup-environment:
+  build-application:
     runs-on: ubuntu-latest
     name: Checkout and Set up Go
     steps:
@@ -30,9 +30,6 @@ jobs:
     - name: Install code dependencies
       run: go get ./... 
 
-  unit-tests:
-    runs-on: ubuntu-latest
-    steps:
     - name: Test code
       run: go test -json -v ./... > TestResults.json
 
@@ -42,9 +39,5 @@ jobs:
         name: TestResults
         path: TestResults.json
 
-  build:
-    runs-on: ubuntu-latest
-    needs: unit-tests
-    steps:
-      - name: Build code    
-        run: go build -v -o cleanup ./cmd/main.go
+    - name: Build code    
+      run: go build -v -o cleanup ./cmd/main.go
