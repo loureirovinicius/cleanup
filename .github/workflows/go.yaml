@@ -13,6 +13,8 @@ jobs:
   build-application:
     runs-on: ubuntu-latest
     name: Checkout and Set up Go
+    env:
+      TESTS_REPORTS_LOCATION: tests/reports
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -34,15 +36,16 @@ jobs:
         export GOPATH="$HOME/go/"
         export PATH=$PATH:$GOPATH/bin
         go install github.com/jstemmer/go-junit-report@latest
+        mkdir ${{ env.TESTS_REPORTS_LOCATION }}
         
     - name: Run unit tests
-      run: go test -v ./... | go-junit-report -set-exit-code > tests/report.xml   
+      run: go test -v ./... | go-junit-report -set-exit-code > ${{ env.TESTS_REPORTS_LOCATION }}/report.xml   
 
     - name: Test Summary
       uses: test-summary/action@v1
       with:
         paths: |
-          tests/report.xml            
+          ${{ env.TESTS_REPORTS_LOCATION }}/report.xml            
       if: always()
 
     - name: Build code    
