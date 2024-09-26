@@ -41,6 +41,13 @@ jobs:
     - name: Run unit tests
       run: go test -v ./... | go-junit-report -set-exit-code > ${{ env.TESTS_REPORTS_LOCATION }}/report.xml
 
+    - name: Test Summary
+      uses: test-summary/action@v1
+      with:
+        paths: |
+          ${{ env.TESTS_REPORTS_LOCATION }}/report.xml            
+      if: always()
+    
     - name: Generate Test Results
       uses: dorny/test-reporter@v1.9.1
       with:
@@ -50,24 +57,11 @@ jobs:
         fail-on-error: 'true'
         use-actions-summary: 'true'
 
-    - name: Test Summary
-      uses: test-summary/action@v1
-      with:
-        paths: |
-          ${{ env.TESTS_REPORTS_LOCATION }}/report.xml            
-      if: always()
-
     - name: Generate test coverage report
       uses: gwatts/go-coverage-action@v2
       with:
-        # Optional coverage threshold
-        # use fail-coverage to determine what should happen below this threshold
         coverage-threshold: 30
-
-        # collect coverage for all packages beyond the one under test
         cover-pkg: ./...
-
-        # Ignore code-generated files when calculating coverage totals
         ignore-pattern: |
           \.pb\.go$
           \_string\.go$
