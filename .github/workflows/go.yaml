@@ -43,7 +43,6 @@ jobs:
 
     - uses: dorny/test-reporter@v1
       with:
-        artifact: unit-tests-results
         name: Unit tests results 
         path: ${{ env.TESTS_REPORTS_LOCATION }}/report.xml
         reporter: java-junit 
