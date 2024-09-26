@@ -12,7 +12,7 @@ on:
 jobs:
   build-application:
     runs-on: ubuntu-latest
-    name: Checkout and Set up Go
+    name: Build application
     env:
       TESTS_REPORTS_LOCATION: tests/reports
     steps:
@@ -48,29 +48,25 @@ jobs:
           ${{ env.TESTS_REPORTS_LOCATION }}/report.xml            
       if: always()
 
+    - name: Generate test coverage report
+      uses: gwatts/go-coverage-action@v2
+      id: coverage
+      with:
+        # Optional coverage threshold
+        # use fail-coverage to determine what should happen below this threshold
+        coverage-threshold: 50
+
+        # collect coverage for all packages beyond the one under test
+        cover-pkg: ./...
+
+        # Ignore code-generated files when calculating coverage totals
+        ignore-pattern: |
+          \.pb\.go$
+          \_string\.go$
+        
+        # A url that the html report will be accessible at, once your
+        # workflow uploads it.  Used in the pull request comment.
+        report-url: https://artifacts.example.com/go-coverage/${{ github.ref_name}}.html
+
     - name: Build code    
       run: go build -v -o cleanup ./cmd/main.go
-  
-  coverage:
-    runs-on: ubuntu-latest
-    name: Test Coverage Report
-    needs: build-application
-    steps:
-      - uses: gwatts/go-coverage-action@v2
-        id: coverage
-        with:
-          # Optional coverage threshold
-          # use fail-coverage to determine what should happen below this threshold
-          coverage-threshold: 50
-
-          # collect coverage for all packages beyond the one under test
-          cover-pkg: ./...
-
-          # Ignore code-generated files when calculating coverage totals
-          ignore-pattern: |
-            \.pb\.go$
-            \_string\.go$
-          
-          # A url that the html report will be accessible at, once your
-          # workflow uploads it.  Used in the pull request comment.
-          report-url: https://artifacts.example.com/go-coverage/${{ github.ref_name}}.html
