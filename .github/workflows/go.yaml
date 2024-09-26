@@ -36,7 +36,7 @@ jobs:
         export GOPATH="$HOME/go/"
         export PATH=$PATH:$GOPATH/bin
         go install github.com/jstemmer/go-junit-report@latest
-        mkdir ${{ env.TESTS_REPORTS_LOCATION }}
+        mkdir -p ${{ env.TESTS_REPORTS_LOCATION }}
         
     - name: Run unit tests
       run: go test -v ./... | go-junit-report -set-exit-code > ${{ env.TESTS_REPORTS_LOCATION }}/report.xml   
@@ -53,6 +53,7 @@ jobs:
   
   coverage:
     runs-on: ubuntu-latest
+    name: Test Coverage Report
     needs: build-application
     steps:
       - uses: gwatts/go-coverage-action@v2
