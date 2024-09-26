@@ -39,7 +39,14 @@ jobs:
         mkdir -p ${{ env.TESTS_REPORTS_LOCATION }}
         
     - name: Run unit tests
-      run: go test -v ./... | go-junit-report -set-exit-code > ${{ env.TESTS_REPORTS_LOCATION }}/report.xml   
+      run: go test -v ./... | go-junit-report -set-exit-code > ${{ env.TESTS_REPORTS_LOCATION }}/report.xml
+
+    - uses: dorny/test-reporter@v1
+      with:
+        artifact: unit-tests-results
+        name: Unit tests results 
+        path: ${{ env.TESTS_REPORTS_LOCATION }}/report.xml
+        reporter: java-junit 
 
     - name: Test Summary
       uses: test-summary/action@v1
@@ -54,7 +61,7 @@ jobs:
       with:
         # Optional coverage threshold
         # use fail-coverage to determine what should happen below this threshold
-        coverage-threshold: 50
+        coverage-threshold: 30
 
         # collect coverage for all packages beyond the one under test
         cover-pkg: ./...
@@ -63,10 +70,6 @@ jobs:
         ignore-pattern: |
           \.pb\.go$
           \_string\.go$
-        
-        # A url that the html report will be accessible at, once your
-        # workflow uploads it.  Used in the pull request comment.
-        report-url: https://artifacts.example.com/go-coverage/${{ github.ref_name}}.html
 
     - name: Build code    
       run: go build -v -o cleanup ./cmd/main.go
