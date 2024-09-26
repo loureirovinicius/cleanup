@@ -41,7 +41,8 @@ jobs:
     - name: Run unit tests
       run: go test -v ./... | go-junit-report -set-exit-code > ${{ env.TESTS_REPORTS_LOCATION }}/report.xml
 
-    - uses: dorny/test-reporter@v1
+    - name: Generate Test Results
+      uses: dorny/test-reporter@v1.9.1
       with:
         name: Unit tests results 
         path: ${{ env.TESTS_REPORTS_LOCATION }}/report.xml
