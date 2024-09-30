@@ -1,0 +1,10 @@
+# Pipeline files
+.github
+.gitignore
+
+# Documentation files
+README.md
+
+# Config files (this should be handled separately by user)
+config.yaml
+config.yml
