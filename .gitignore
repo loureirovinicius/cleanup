@@ -22,4 +22,5 @@ go.work
 go.work.sum
 
 # Config file (may contain sensitive data and therefore should not be pushed)
-config.yaml
+**/config.yaml
+**/config.yml
