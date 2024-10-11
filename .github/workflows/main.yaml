@@ -17,12 +17,15 @@ jobs:
 
   build-application:
     # if: ${{ github.event.pull_request.merged }}
+    needs: lint
     uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@master
 
   build-and-publish-image:
     # if: ${{ github.event.pull_request.merged }}
+    needs: build-application
     uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@master
   
   create-tag-and-release:
     # if: ${{ github.event.pull_request.merged }}
+    needs: build-and-publish-image
     uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@master
