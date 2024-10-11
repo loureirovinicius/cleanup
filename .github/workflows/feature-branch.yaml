@@ -12,10 +12,10 @@ concurrency:
 
 jobs:
   lint:
-    uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@master
+    uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@feat/ci-cd
 
   build-application:
-    uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@master
+    uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@feat/ci-cd
 
   upload-binary:
     name: Upload last binary file generated to PR
