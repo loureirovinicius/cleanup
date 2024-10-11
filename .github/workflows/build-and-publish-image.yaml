@@ -7,16 +7,10 @@ on:
         description: "Image registry used by this project"
         required: true
         type: string
-      image_version:
-        description: "Container image version"
-        required: true
-        type: string
+    secrets:
       registry_username:
         description: "Docker Registry Username used for this project"
-        default: loureirovinicius
         required: true
-        type: string
-    secrets:
       registry_token:
         description: "Token used for Docker Registry authentication"
         required: true
