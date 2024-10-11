@@ -8,10 +8,10 @@ on:
         required: true
         type: string
     secrets:
-      registry_username:
+      registry-username:
         description: "Docker Registry Username used for this project"
         required: true
-      registry_token:
+      registry-token:
         description: "Token used for Docker Registry authentication"
         required: true
 
@@ -41,8 +41,8 @@ jobs:
         uses: docker/login-action@v2.1.0
         with:
           registry: ${{ inputs.registry }}
-          username: ${{ secrets.registry_username }}
-          password: ${{ secrets.registry_token }}
+          username: ${{ secrets.registry-username }}
+          password: ${{ secrets.registry-token }}
 
       - name: Populate and extract Docker metadata
         id: meta
