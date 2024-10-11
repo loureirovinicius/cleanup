@@ -1,0 +1,39 @@
+name: Go Lint
+
+on:
+  workflow_call:
+    inputs:
+      go-version-file:
+        description: "Go's .mod file specifying the version being used in this project. Defaults to go.mod."
+        default: "go.mod"
+        required: false
+        type: string
+      golangci-lint-version:
+        description: "Golang CI Lint version. Defaults to v1.60."
+        default: "v1.60"
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Golang CI Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ inputs.go-version-file }}
+          cache-dependency-path: "**/*.sum"
+      
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: ${{ inputs.golangci-lint-version }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          args: --timeout=2m --verbose
