@@ -2,9 +2,6 @@ name: Publish new release
 
 on:
   push:
-  # pull_request:
-  #   types:
-  #     - closed
     branches:
       - feat/ci-cd
     tags:
@@ -12,25 +9,20 @@ on:
 
 jobs:
   lint:
-    # if: ${{ github.event.pull_request.merged }}
-    uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@master
+    uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@feat/ci-cd
 
   build-application:
-    # if: ${{ github.event.pull_request.merged }}
     needs: lint
-    uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@master
+    uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@feat/ci-cd
 
   build-and-publish-image:
-    # if: ${{ github.event.pull_request.merged }}
     needs: build-application
-    uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@master
+    uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@feat/ci-cd
     with:
       registry: loureirovini
       registry_username: ${{ secrets.REGISTRY_USERNAME }}
       registry_token: ${{ secrets.REGISTRY_TOKEN }}
 
-  
   create-tag-and-release:
-    # if: ${{ github.event.pull_request.merged }}
     needs: build-and-publish-image
-    uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@master
+    uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@feat/ci-cd
