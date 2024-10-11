@@ -41,7 +41,7 @@ jobs:
         uses: docker/login-action@v2.1.0
         with:
           registry: ${{ inputs.registry }}
-          username: ${{ inputs.registry_username }}
+          username: ${{ secrets.registry_username }}
           password: ${{ secrets.registry_token }}
 
       - name: Populate and extract Docker metadata
