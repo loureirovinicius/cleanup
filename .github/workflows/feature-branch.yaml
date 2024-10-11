@@ -15,6 +15,7 @@ jobs:
     uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@feat/ci-cd
 
   build-application:
+    needs: lint
     uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@feat/ci-cd
 
   upload-binary:
