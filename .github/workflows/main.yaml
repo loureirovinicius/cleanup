@@ -19,11 +19,10 @@ jobs:
     needs: build-application
     uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@feat/ci-cd
     with:
-      registry: loureirovini
+      registry: "loureirovini"
     secrets:
       registry_username: ${{ secrets.REGISTRY_USERNAME }}
       registry_token: ${{ secrets.REGISTRY_TOKEN }}
-
 
   create-tag-and-release:
     needs: build-and-publish-image
