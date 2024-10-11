@@ -15,22 +15,20 @@ jobs:
     uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@feat/ci-cd
 
   build-application:
-    # needs: lint
     uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@feat/ci-cd
+    with:
+      upload-binary: true
 
-  upload-binary:
-    name: Upload last binary file generated
+  download-binary:
+    name: Download Cleanup binary generated
     runs-on: ubuntu-latest
     needs: build-application
     steps:
-      - name: test
-        run: |
-          ls -la
-      - name: Upload binary
-        uses: actions/upload-artifact@v4
+      - name: Download binary
+        uses: actions/download-artifact@v4
         with:
-          name: Cleanup binary file
-          path: cleanup
+          name: cleanup_binary
+
 
   
   
