@@ -12,10 +12,10 @@ concurrency:
 
 jobs:
   lint:
-    uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@feat/ci-cd
+    uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@master
 
   build-application:
-    uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@feat/ci-cd
+    uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@master
     with:
       upload-binary: true
 
