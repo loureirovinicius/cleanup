@@ -31,10 +31,21 @@ aws:
       secret_key: # AWS Secret Key (optional)
 ```
 
-2. Compile it using Docker or Go:
+2. Compile or run it using Docker or Go:
     - Docker (TBD)
+      - Building the binary using a Docker container:
+      ```bash
+        docker run --rm --mount type=bind,source=$(pwd),target=/bin -w /app golang:alpine go build -o cleanup cmd/main.go
+      ```
+      - Building and running it inside a Docker container:
         ```bash
-          docker run --rm --mount type=bind,source=$(pwd),target=/app -w /app golang:alpine go build -o cleanup cmd/main.go
+          docker build -t cleanup:latest
+          docker run -i --rm --mount type=bind,source="$(pwd)/config.yaml",target=/var/cleanup/config.yaml cleanup:latest
+          /app/cleanup help
+        ```
+      - Pulling image from Dockerhub:
+        ```bash
+          docker run -i --rm --mount type=bind,source="$(pwd)/config.yaml",target=/var/cleanup/config.yaml loureirovinicius/cleanup:stable
         ```
 
     - Go
