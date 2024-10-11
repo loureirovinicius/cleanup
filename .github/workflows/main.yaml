@@ -21,8 +21,8 @@ jobs:
     with:
       registry: "loureirovini"
     secrets:
-      registry_username: ${{ secrets.REGISTRY_USERNAME }}
-      registry_token: ${{ secrets.REGISTRY_TOKEN }}
+      registry_username: "${{ secrets.REGISTRY_USERNAME }}"
+      registry_token: "${{ secrets.REGISTRY_TOKEN }}"
 
   create-tag-and-release:
     needs: build-and-publish-image
