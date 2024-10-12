@@ -63,7 +63,7 @@ jobs:
           context: .
           push: true
           # tags: ${{ steps.meta.outputs.tags }}
-          tags: latest
+          tags: loureirovini/cleanup:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
