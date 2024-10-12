@@ -18,7 +18,7 @@ jobs:
     needs: build-application
     uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@feat/ci-cd
     with:
-      registry: loureirovini
+      registry: hub.docker.com
     secrets:
       registry-username: ${{ secrets.REGISTRY_USERNAME }}
       registry-token: ${{ secrets.REGISTRY_TOKEN }}
