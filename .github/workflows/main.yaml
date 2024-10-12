@@ -7,16 +7,20 @@ on:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
-    uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@feat/ci-cd
+    uses: loureirovinicius/cleanup/.github/workflows/lint.yaml@master
 
   build-application:
-    uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@feat/ci-cd
+    uses: loureirovinicius/cleanup/.github/workflows/build-application.yaml@master
 
   build-and-publish-image:
     needs: build-application
-    uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@feat/ci-cd
+    uses: loureirovinicius/cleanup/.github/workflows/build-and-publish-image.yaml@master
     with:
       registry: loureirovini
     secrets:
@@ -25,4 +29,4 @@ jobs:
 
   create-tag-and-release:
     needs: build-and-publish-image
-    uses: loureirovinicius/cleanup/.github/workflows/create-tag-and-release.yaml@feat/ci-cd
+    uses: loureirovinicius/cleanup/.github/workflows/create-tag-and-release.yaml@master
