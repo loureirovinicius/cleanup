@@ -52,8 +52,6 @@ jobs:
             latest=true
           tags: |
             type=ref,event=tag
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}.{{patch}}
 
       - name: Build and push Docker image
         id: build-and-push
@@ -69,7 +67,7 @@ jobs:
         id: docker-scout
         uses: docker/scout-action@v1
         with:
-          command: compare,recommendations
+          command: quickview,cves,recommendations
           to: ${{ inputs.registry }}/cleanup:latest
           ignore-unchanged: true
           only-severities: critical,high
