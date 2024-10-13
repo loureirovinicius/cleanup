@@ -2,42 +2,15 @@ name: Create tag and release workflow
 
 on:
   workflow_call:
-    # inputs:
-    #   tag_name:
-    #     description: "Tag name. Must follow Semver convention."
-    #     required: true
-    #     type: string
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  # create-tag:
-  #   name: Validate tag name and create a new one
-  #   runs-on: ubuntu-latest
-  #   permissions: write-all
-  #   steps:
-  #     - name: Validate tag name
-  #       run: |
-  #         version=${{ inputs.tag_name }}
-  #         [[ "$version" =~ v^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "Valid Semver: $version" || (echo "Invalid Semver: $version" && exit 1)
-
-  #     - name: Create tag
-  #       uses: actions/github-script@v5
-  #       with:
-  #         script: |
-  #           github.rest.git.createRef({
-  #               owner: context.repo.owner,
-  #               repo: context.repo.repo,
-  #               ref: 'refs/tags/${{ inputs.tag_name }}',
-  #               sha: context.sha
-  #             })
-  
   release:
     name: Create a new release along with the release notes
     runs-on: ubuntu-latest
-    # needs: create-tag
     permissions:
       contents: write
     steps:
