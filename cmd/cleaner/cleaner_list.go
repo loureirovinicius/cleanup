@@ -19,7 +19,10 @@ func (c *CleanerListCommand) Run(ctx context.Context, service Cleanable) error {
 	list := flag.NewFlagSet("list", flag.ExitOnError)
 	list.StringVar(&value, "service", "", "cloud provider service")
 	list.StringVar(&value, "s", "", "cloud provider service")
-	list.Parse(os.Args[2:])
+	err := list.Parse(os.Args[2:])
+	if err != nil {
+		return fmt.Errorf("error parsing CLI args: %v", err)
+	}
 
 	// List all created resources for a service
 	res, err := service.List(ctx)

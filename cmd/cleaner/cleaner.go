@@ -2,7 +2,7 @@ package cleaner
 
 import (
 	"context"
-	"flag"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -10,11 +10,18 @@ import (
 func Run(ctx context.Context, services map[string]Cleanable) error {
 	var cmd, svcName string
 
-	// Assign respective values to their variables
-	if len(os.Args) > 0 {
-		cmd, svcName = os.Args[1], os.Args[3]
+	// Checks if it contains the minimum required args
+	if len(os.Args) < 3 {
+		usage()
+		return nil
 	}
 
+	cmd, svcName = os.Args[1], os.Args[3]
+
+	// Validates if service exists so that the program doesn't crash
+	if _, ok := services[svcName]; !ok {
+		return errors.New("please provide an existing service. Refer to this project's README for the full list of available services")
+	}
 	service := services[svcName]
 
 	switch cmd {
@@ -26,7 +33,7 @@ func Run(ctx context.Context, services map[string]Cleanable) error {
 		return (&CleanerDeleteCommand{}).Run(ctx, service)
 	default:
 		usage()
-		return flag.ErrHelp
+		return nil
 	}
 }
 

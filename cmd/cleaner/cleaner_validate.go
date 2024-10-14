@@ -18,7 +18,10 @@ func (c *CleanerValidateCommand) Run(ctx context.Context, service Cleanable) err
 	validate := flag.NewFlagSet("validate", flag.ExitOnError)
 	validate.StringVar(&value, "service", "", "cloud provider service")
 	validate.StringVar(&value, "s", "", "cloud provider service")
-	validate.Parse(os.Args[2:])
+	err := validate.Parse(os.Args[2:])
+	if err != nil {
+		return fmt.Errorf("error parsing CLI args: %v", err)
+	}
 
 	resources, err := service.List(ctx)
 	if err != nil {

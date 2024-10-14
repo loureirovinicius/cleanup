@@ -18,7 +18,10 @@ func (c *CleanerDeleteCommand) Run(ctx context.Context, service Cleanable) error
 	delete := flag.NewFlagSet("delete", flag.ExitOnError)
 	delete.StringVar(&value, "service", "", "cloud provider service")
 	delete.StringVar(&value, "s", "", "cloud provider service")
-	delete.Parse(os.Args[2:])
+	err := delete.Parse(os.Args[2:])
+	if err != nil {
+		return fmt.Errorf("error parsing CLI args: %v", err)
+	}
 
 	// List all created resources for a service
 	resources, err := service.List(ctx)
