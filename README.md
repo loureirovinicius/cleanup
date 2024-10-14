@@ -1,6 +1,7 @@
 # Cleanup (Cloud Provider Sanitization tool)
 
 Cleanup is a tool designed to accomplish **effective costs on Cloud Providers** (AWS, GCP, etc...) without wasting money on unused resources - an empty Load Balancer, for example. Such tool was thought to be one of the greatest allies in a FinOps culture for its simplicity, efficiency and security.\
+\
 Everything can be packaged into a single binary that can run on serverless structures, pipelines and even manually. Contracts were established through interfaces so it could also be expanded to other providers and resources, so you're highly encouraged to contribute with it since the codebase is pretty simple.
 
 ## Supported resources:
@@ -34,9 +35,9 @@ aws:
 2. Compile or run it using Docker or Go:
     - Docker
       - Building the binary using a Docker container:
-      ```bash
-        docker run --rm --mount type=bind,source=$(pwd),target=/bin -w /app golang:alpine go build -o cleanup cmd/main.go
-      ```
+        ```bash
+          docker run --rm --mount type=bind,source=$(pwd),target=/bin -w /app golang:alpine go build -o cleanup cmd/main.go
+        ```
       - Building and running it inside a Docker container:
         ```bash
           docker build -t cleanup:latest
