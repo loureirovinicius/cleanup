@@ -4,7 +4,7 @@ Cleanup is a tool designed to accomplish **effective costs on Cloud Providers** 
 \
 Everything can be packaged into a single binary that can run on serverless structures, pipelines and even manually. Contracts were established through interfaces so it could also be expanded to other providers and resources, so you're highly encouraged to contribute with it since the codebase is pretty simple.
 
-## Supported resources:
+## Supported resources
 
 | Provider | Resource | Validation method |
 | -------- | -------- | ----------------- |
@@ -15,7 +15,7 @@ Everything can be packaged into a single binary that can run on serverless struc
 | AWS | loadBalancer | Checks if LoadBalancer has no Listener attached
 
 
-## Usage:
+## Usage
 
 1. Populate the configuration file as required:
 
@@ -61,4 +61,10 @@ cleanup validate --service targetGroup
 cleanup delete --service targetGroup
 ```
 
+## License
 
+This is free software under the terms of the MIT license (read more about it so you can understand limitations).
+
+## Contributing
+
+You're welcome to contribute to this repository. Please fork it, make your changes and submit a pull request so we can review it.
