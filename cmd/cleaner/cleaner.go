@@ -2,61 +2,119 @@ package cleaner
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"os"
+
+	"github.com/loureirovinicius/cleanup/config"
+	"github.com/loureirovinicius/cleanup/helpers/logger"
+	"github.com/loureirovinicius/cleanup/provider"
+	"github.com/spf13/cobra"
 )
 
-func Run(ctx context.Context, services map[string]Cleanable) error {
-	var cmd, svcName string
-
-	// Checks if it contains the minimum required args
-	if len(os.Args) < 3 {
-		usage()
-		return nil
+var (
+	services map[string]provider.Cleanable
+	ctx      context.Context
+	debug    bool
+	rootCmd  = &cobra.Command{
+		Use:   "cleanup",
+		Short: "Cleanup - Cloud Provider Sanitization tool",
+		Long:  "Cleanup is a tool designed to accomplish effective costs on Cloud Providers (AWS, GCP, etc...) without wasting money on unused resources - an empty Load Balancer, for example. Such tool was thought to be one of the greatest allies in a FinOps culture for its simplicity, efficiency and security.",
 	}
 
-	cmd, svcName = os.Args[1], os.Args[3]
+	listCommand = &cobra.Command{
+		Use:   "list",
+		Short: "Lists all the created resources for a certain provider's service",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			// args[0] = service name (like ebs, eni, etc...)
+			var err error
 
-	// Validates if service exists so that the program doesn't crash
-	if _, ok := services[svcName]; !ok {
-		return errors.New("please provide an existing service. Refer to this project's README for the full list of available services")
-	}
-	service := services[svcName]
+			debug, err = cmd.Flags().GetBool("debug")
+			if err != nil {
+				logger.Log(ctx, "error", err.Error())
+			}
 
-	switch cmd {
-	case "list":
-		return (&CleanerListCommand{}).Run(ctx, service)
-	case "validate":
-		return (&CleanerValidateCommand{}).Run(ctx, service)
-	case "delete":
-		return (&CleanerDeleteCommand{}).Run(ctx, service)
-	default:
-		usage()
-		return nil
+			service := args[0]
+
+			setup()
+			list(ctx, services[service])
+		},
 	}
+
+	validateCommand = &cobra.Command{
+		Use:   "validate",
+		Short: "Validate if resources can be deleted or not",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			// args[0] = service name (like ebs, eni, etc...)
+			var err error
+
+			debug, err = cmd.Flags().GetBool("debug")
+			if err != nil {
+				logger.Log(ctx, "error", err.Error())
+			}
+
+			service := args[0]
+
+			setup()
+			validate(ctx, services[service])
+		},
+	}
+
+	deleteCommand = &cobra.Command{
+		Use:   "delete",
+		Short: "Delete the unused resource",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			// args[0] = service name (like ebs, eni, etc...)
+			var err error
+
+			debug, err = cmd.Flags().GetBool("debug")
+			if err != nil {
+				logger.Log(ctx, "error", err.Error())
+			}
+
+			service := args[0]
+
+			setup()
+			delete(ctx, services[service])
+		},
+	}
+)
+
+func init() {
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Enables debug mode")
+	rootCmd.AddCommand(listCommand, validateCommand, deleteCommand)
 }
 
-func usage() {
-	fmt.Print(`Cleanup is a tool for cloud providers' resources cleaning. You can quickly list, validate or delete resources from your current cloud provider vendor. The tool is being incrementally built, so the only provider currently supported is AWS with few resources.
+func setup() {
+	ctx = context.Background()
 
-Usage:
-	cleanup <command> (--service | -service) <service_name>
+	if debug {
+		logger.SetLevel("debug")
+	}
 
-Commands Usage:
-	cleanup list (--service | -service) <service_name>
+	// Start initialization of configuration
+	logger.Log(ctx, "info", "Initializing configs...")
+	err := config.Start()
+	if err != nil {
+		logger.Log(ctx, "error", err.Error())
+		return
+	}
+	logger.Log(ctx, "info", "Configs were setupd successfully!")
 
-		Options:
-			--service STRING  (required) the service name you're trying to list (these service names are available in the documentation).
+	// Load the provider configuration
+	logger.Log(ctx, "info", "Initializing provider's services...")
+	services, err = provider.LoadProvider(ctx, "aws")
+	if err != nil {
+		logger.Log(ctx, "error", err.Error())
+		return
+	}
+	logger.Log(ctx, "info", "Services were setupd successfully!")
+}
 
-	cleanup validate (--service | -service) <service_name>
+func Run() error {
+	if err := rootCmd.Execute(); err != nil {
+		return err
+	}
 
-		Options:
-			--service STRING  (required) the service name you're trying to validate (these service names are available in the documentation). Each resource has its own rules to be considered empty, so check docs to understand these rules.
-
-	cleanup delete (--service | -service) <service_name>
-
-		Options:
-			--service STRING  (required) the service name you're trying to delete (these service names are available in the documentation). A resource can only be deleted if empty, so check it first using the "validate" operation.
-	`)
+	return nil
 }
