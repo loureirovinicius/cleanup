@@ -2,27 +2,13 @@ package cleaner
 
 import (
 	"context"
-	"flag"
 	"fmt"
-	"os"
 
 	"github.com/loureirovinicius/cleanup/helpers/logger"
+	"github.com/loureirovinicius/cleanup/provider"
 )
 
-type CleanerDeleteCommand struct{}
-
-func (c *CleanerDeleteCommand) Run(ctx context.Context, service Cleanable) error {
-	var value string
-
-	// Creates flag parameters for the "Validate" operation
-	delete := flag.NewFlagSet("delete", flag.ExitOnError)
-	delete.StringVar(&value, "service", "", "cloud provider service")
-	delete.StringVar(&value, "s", "", "cloud provider service")
-	err := delete.Parse(os.Args[2:])
-	if err != nil {
-		return fmt.Errorf("error parsing CLI args: %v", err)
-	}
-
+func delete(ctx context.Context, service provider.Cleanable) error {
 	// List all created resources for a service
 	resources, err := service.List(ctx)
 	if err != nil {

@@ -1,32 +1,14 @@
 package main
 
 import (
-	"context"
+	"fmt"
 
 	"github.com/loureirovinicius/cleanup/cmd/cleaner"
-	"github.com/loureirovinicius/cleanup/config"
-	"github.com/loureirovinicius/cleanup/helpers/logger"
-	"github.com/loureirovinicius/cleanup/provider"
 )
 
 func main() {
-	ctx := context.Background()
-
-	// Start initialization of configuration
-	err := config.Start()
+	err := cleaner.Run()
 	if err != nil {
-		logger.Log(ctx, "error", err.Error())
-	}
-
-	// Load the provider configuration
-	services, err := provider.LoadProvider(ctx, "aws")
-	if err != nil {
-		logger.Log(ctx, "error", err.Error())
-	}
-
-	// Starts the Cleaner
-	err = cleaner.Run(ctx, services)
-	if err != nil {
-		logger.Log(ctx, "error", err.Error())
+		panic(fmt.Errorf("there was an error running the cleaner: %v", err))
 	}
 }

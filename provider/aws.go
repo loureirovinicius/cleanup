@@ -4,20 +4,25 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"maps"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	ec2internal "github.com/loureirovinicius/cleanup/aws/service/ec2"
-	"github.com/loureirovinicius/cleanup/cmd/cleaner"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
+	elasticblockstorage "github.com/loureirovinicius/cleanup/aws/service/ec2/elasticBlockStorage"
+	elasticip "github.com/loureirovinicius/cleanup/aws/service/ec2/elasticIp"
+	elasticnetworkinterface "github.com/loureirovinicius/cleanup/aws/service/ec2/elasticNetworkInterface"
+	loadbalancer "github.com/loureirovinicius/cleanup/aws/service/ec2/loadBalancer"
+	targetgroup "github.com/loureirovinicius/cleanup/aws/service/ec2/targetGroup"
+	"github.com/loureirovinicius/cleanup/helpers/logger"
 	"github.com/spf13/viper"
 )
 
 type AWS struct {
 	config    Config
 	client    *aws.Config
-	Resources map[string]cleaner.Cleanable
+	Resources map[string]Cleanable
 }
 
 type Config struct {
@@ -48,24 +53,21 @@ type Credentials struct {
 }
 
 func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) error {
+	logger.Log(ctx, "debug", "Loading AWS configurations...")
 	err := p.loadConfig()
 	if err != nil {
 		return err
 	}
+	logger.Log(ctx, "debug", "AWS configs were loaded successfully!")
 
+	logger.Log(ctx, "debug", "Creating AWS client...")
 	err = p.createClient(ctx)
 	if err != nil {
 		return err
 	}
+	logger.Log(ctx, "debug", "AWS client was created successfully!")
 
-	services := map[string]map[string]cleaner.Cleanable{
-		"ec2": ec2internal.Initialize(*p.client),
-	}
-
-	p.Resources = map[string]cleaner.Cleanable{}
-	for _, v := range services {
-		maps.Copy(p.Resources, v)
-	}
+	p.Resources = p.loadServices(ctx)
 
 	cfg.AWS = *p
 
@@ -116,4 +118,19 @@ func (p *AWS) loadConfig() error {
 	}
 
 	return nil
+}
+
+func (p *AWS) loadServices(ctx context.Context) map[string]Cleanable {
+	ec2API := ec2.NewFromConfig(*p.client)
+	logger.Log(ctx, "debug", "EC2 Configs initialized...")
+	elbAPI := elasticloadbalancingv2.NewFromConfig(*p.client)
+	logger.Log(ctx, "debug", "ELB Configs initialized...")
+
+	return map[string]Cleanable{
+		"targetGroup":  &targetgroup.TargetGroup{API: elbAPI},
+		"loadBalancer": &loadbalancer.LoadBalancer{API: elbAPI},
+		"eni":          &elasticnetworkinterface.ElasticNetworkInterface{API: ec2API},
+		"eip":          &elasticip.ElasticIP{API: ec2API},
+		"ebs":          &elasticblockstorage.ElasticBlockStorage{API: ec2API},
+	}
 }

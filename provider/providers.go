@@ -3,8 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-
-	"github.com/loureirovinicius/cleanup/cmd/cleaner"
 )
 
 type ProviderConfig struct {
@@ -16,7 +14,7 @@ type Provider interface {
 	Initialize(context.Context, *ProviderConfig) error
 }
 
-func LoadProvider(ctx context.Context, provider string) (map[string]cleaner.Cleanable, error) {
+func LoadProvider(ctx context.Context, provider string) (map[string]Cleanable, error) {
 	cfg := ProviderConfig{}
 
 	switch provider {
