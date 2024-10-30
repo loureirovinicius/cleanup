@@ -35,13 +35,16 @@ var (
 			service := args[0]
 
 			setup()
-			list(ctx, services[service])
+			err = list(ctx, services[service])
+			if err != nil {
+				logger.Log(ctx, "error", err.Error())
+			}
 		},
 	}
 
 	validateCommand = &cobra.Command{
 		Use:   "validate",
-		Short: "Validate if resources can be deleted or not",
+		Short: "Validates if resources can be deleted or not",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// args[0] = service name (like ebs, eni, etc...)
@@ -55,13 +58,16 @@ var (
 			service := args[0]
 
 			setup()
-			validate(ctx, services[service])
+			err = validate(ctx, services[service])
+			if err != nil {
+				logger.Log(ctx, "error", err.Error())
+			}
 		},
 	}
 
 	deleteCommand = &cobra.Command{
 		Use:   "delete",
-		Short: "Delete the unused resource",
+		Short: "Deletes the unused resource",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// args[0] = service name (like ebs, eni, etc...)
@@ -75,7 +81,10 @@ var (
 			service := args[0]
 
 			setup()
-			delete(ctx, services[service])
+			err = delete(ctx, services[service])
+			if err != nil {
+				logger.Log(ctx, "error", err.Error())
+			}
 		},
 	}
 )
@@ -86,8 +95,6 @@ func init() {
 }
 
 func setup() {
-	ctx = context.Background()
-
 	if debug {
 		logger.SetLevel("debug")
 	}
@@ -99,7 +106,7 @@ func setup() {
 		logger.Log(ctx, "error", err.Error())
 		return
 	}
-	logger.Log(ctx, "info", "Configs were setupd successfully!")
+	logger.Log(ctx, "info", "Configs were initialized successfully!")
 
 	// Load the provider configuration
 	logger.Log(ctx, "info", "Initializing provider's services...")
@@ -108,10 +115,12 @@ func setup() {
 		logger.Log(ctx, "error", err.Error())
 		return
 	}
-	logger.Log(ctx, "info", "Services were setupd successfully!")
+	logger.Log(ctx, "info", "Services were initialized successfully!")
 }
 
 func Run() error {
+	ctx = context.Background()
+
 	if err := rootCmd.Execute(); err != nil {
 		return err
 	}
