@@ -20,7 +20,10 @@ func Start(provider string) error {
 	// Verify the cloud provider being used for config initialization
 	switch provider {
 	case "aws":
-		loadAWSConfig()
+		err := loadAWSConfig()
+		if err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("provider %s is not supported", provider)
 	}
@@ -36,10 +39,28 @@ func Start(provider string) error {
 	return nil
 }
 
-func loadAWSConfig() {
+func loadAWSConfig() error {
 	viper.SetEnvPrefix("AWS")
-	viper.BindEnv("region")                 // AWS_REGION env variable
-	viper.BindEnv("profile.name")           // AWS_PROFILE_NAME env variable
-	viper.BindEnv("credentials.access_key") // AWS_ACCESS_KEY env variable
-	viper.BindEnv("credentials.secret_key") // AWS_SECRET_KEY env variable
+
+	// AWS_REGION env variable
+	if err := viper.BindEnv("region"); err != nil {
+		return fmt.Errorf("error binding region variable: %w", err)
+	}
+
+	// AWS_PROFILE_NAME env variable
+	if err := viper.BindEnv("profile.name"); err != nil {
+		return fmt.Errorf("error binding profile_name variable: %w", err)
+	}
+
+	// AWS_ACCESS_KEY env variable
+	if err := viper.BindEnv("credentials.access_key"); err != nil {
+		return fmt.Errorf("error binding access_key variable: %w", err)
+	}
+
+	// AWS_SECRET_KEY env variable
+	if err := viper.BindEnv("credentials.secret_key"); err != nil {
+		return fmt.Errorf("error binding secret_key variable: %w", err)
+	}
+
+	return nil
 }
