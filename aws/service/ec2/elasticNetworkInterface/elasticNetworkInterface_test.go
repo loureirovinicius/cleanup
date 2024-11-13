@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	elasticnetworkinterface "github.com/loureirovinicius/cleanup/aws/service/ec2/elasticNetworkInterface"
+	"github.com/loureirovinicius/cleanup/helpers/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -15,6 +16,10 @@ import (
 // MockEC2 is a mock of EC2 interface
 type MockEC2 struct {
 	mock.Mock
+}
+
+func init() {
+	logger.InitializeLogger("info", "json")
 }
 
 func (m *MockEC2) DescribeNetworkInterfaces(ctx context.Context, params *ec2.DescribeNetworkInterfacesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeNetworkInterfacesOutput, error) {
