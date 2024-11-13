@@ -136,7 +136,7 @@ func Run() error {
 		level = "debug"
 	}
 
-	logger.InitializeLogger(level, output)
+	logger.InitializeLogger(level, output, os.Stdout)
 
 	// Start initialization of configuration
 	logger.Log(ctx, "info", "Initializing configs...")

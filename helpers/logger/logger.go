@@ -2,28 +2,29 @@ package logger
 
 import (
 	"context"
+	"io"
 	"log/slog"
-	"os"
 	"strings"
 )
 
-var logger *slog.Logger
-
 var (
+	logger    *slog.Logger
 	logLevels = map[string]slog.Level{
 		"info":  slog.LevelInfo,
 		"error": slog.LevelError,
 		"debug": slog.LevelDebug,
 	}
-	logLevel  = &slog.LevelVar{}
-	logFormat = map[string]slog.Handler{
-		"text": slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}),
-		"json": slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}),
-	}
+	logLevel = &slog.LevelVar{}
 )
 
 // Initialize logger
-func InitializeLogger(level string, format string) {
+func InitializeLogger(level string, format string, dst io.Writer) {
+
+	logFormat := map[string]slog.Handler{
+		"text": slog.NewTextHandler(dst, &slog.HandlerOptions{Level: logLevel}),
+		"json": slog.NewJSONHandler(dst, &slog.HandlerOptions{Level: logLevel}),
+	}
+
 	// Set log level
 	lvl, ok := logLevels[level]
 	if !ok {

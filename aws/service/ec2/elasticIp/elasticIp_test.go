@@ -2,6 +2,7 @@ package elasticip_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -19,7 +20,7 @@ type MockEC2 struct {
 }
 
 func init() {
-	logger.InitializeLogger("info", "json")
+	logger.InitializeLogger("info", "json", os.Stdout)
 }
 
 func (m *MockEC2) DescribeAddresses(ctx context.Context, params *ec2.DescribeAddressesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeAddressesOutput, error) {
