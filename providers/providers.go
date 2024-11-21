@@ -7,7 +7,6 @@ import (
 
 type ProviderConfig struct {
 	AWS
-	// GCP (soon)
 }
 
 type Provider interface {

@@ -48,17 +48,17 @@ func loadAWSConfig() error {
 	}
 
 	// AWS_PROFILE_NAME env variable
-	if err := viper.BindEnv("profile.name"); err != nil {
+	if err := viper.BindEnv("profile.name", "AWS_PROFILE_NAME"); err != nil {
 		return fmt.Errorf("error binding profile_name variable: %w", err)
 	}
 
 	// AWS_ACCESS_KEY env variable
-	if err := viper.BindEnv("credentials.access_key"); err != nil {
+	if err := viper.BindEnv("credentials.access_key", "AWS_ACCESS_KEY"); err != nil {
 		return fmt.Errorf("error binding access_key variable: %w", err)
 	}
 
 	// AWS_SECRET_KEY env variable
-	if err := viper.BindEnv("credentials.secret_key"); err != nil {
+	if err := viper.BindEnv("credentials.secret_key", "AWS_SECRET_KEY"); err != nil {
 		return fmt.Errorf("error binding secret_key variable: %w", err)
 	}
 
