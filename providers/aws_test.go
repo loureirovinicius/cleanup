@@ -11,10 +11,71 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestInitialize(t *testing.T) {
+	// Mock dependencies
+	ctx := context.Background()
+
+	// Mock provider
+	provider := AWS{}
+
+	// Initialize logger
+	logger.InitializeLogger("info", "text", os.Stdout)
+
+	cases := map[string]struct {
+		input    string
+		helpers  func()
+		testCase func(*testing.T, interface{}, error)
+	}{
+		"Successful Initialization": {
+			input: "ebs",
+			helpers: func() {
+				viper.Set("aws.region", "us-east-1")
+			},
+			testCase: func(t *testing.T, output interface{}, err error) {
+				assert.Nil(t, err, "error should be nil")
+			},
+		},
+		"Failed Initialization. Missing AWS region when loading configs": {
+			input: "ebs",
+			helpers: func() {
+				viper.Reset()
+			},
+			testCase: func(t *testing.T, output interface{}, err error) {
+				assert.NotNil(t, err, "error should not be nil since the AWS region is empty")
+				if assert.Error(t, err, "error is nil") {
+					assert.Equal(t, "AWS region can't be empty", err.Error())
+				}
+			},
+		},
+		"Failed Initialization. Application doesn't support the service requested": {
+			input: "eks",
+			helpers: func() {
+				viper.Set("aws.region", "us-east-1")
+			},
+			testCase: func(t *testing.T, output interface{}, err error) {
+				assert.NotNil(t, err, "error shoould not be nil since application doesn't support this AWS service")
+				if assert.Error(t, err, "error is nil") {
+					assert.Equal(t, "service eks is not supported", err.Error())
+				}
+			},
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			test.helpers()
+
+			err := provider.Initialize(ctx, test.input)
+			test.testCase(t, nil, err)
+		})
+	}
+}
+
 func TestLoadAWSService(t *testing.T) {
 	// Mock dependencies
 	ctx := context.Background()
 
+	// Mock provider
 	provider := AWS{}
 
 	// Mock AWS config
@@ -54,24 +115,67 @@ func TestLoadAWSService(t *testing.T) {
 	}
 }
 
-func TestAWSInitialize(t *testing.T) {
+func TestCreateClient(t *testing.T) {
+	// Mock dependencies
+	ctx := context.Background()
+
+	// Mock provider
 	provider := AWS{}
 
-	// Test case: Missing region
-	t.Run("Missing Region", func(t *testing.T) {
-		viper.Reset() // Clear mocked config
-		err := provider.loadConfig()
-		if err == nil || err.Error() != "AWS region can't be empty" {
-			t.Errorf("Expected missing region error, got: %v", err)
-		}
-	})
+	cases := map[string]struct {
+		testCase func(*testing.T, interface{}, error)
+	}{
+		"AWS client created successfully": {
+			testCase: func(t *testing.T, output interface{}, err error) {
+				assert.Nil(t, err, "expected no error to be returned")
+				assert.NotNil(t, output, "expected AWS config object to be returned")
+			},
+		},
+	}
 
-	// Test case: Valid configuration
-	t.Run("Valid Configuration", func(t *testing.T) {
-		viper.Set("aws.region", "us-east-1")
-		err := provider.loadConfig()
-		if err != nil {
-			t.Errorf("Expected no error, got: %v", err)
-		}
-	})
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			client, err := provider.createClient(ctx)
+			test.testCase(t, client, err)
+		})
+	}
+}
+
+func TestLoadConfig(t *testing.T) {
+	// Mock provider
+	provider := AWS{}
+
+	cases := map[string]struct {
+		helpers  func()
+		testCase func(*testing.T, interface{}, error)
+	}{
+		"Missing AWS Region": {
+			helpers: func() {
+				viper.Reset()
+			},
+			testCase: func(t *testing.T, output interface{}, err error) {
+				assert.NotNil(t, err, "expected error to be returned when region is empty")
+				if assert.Error(t, err, "error is nil") {
+					assert.Equal(t, "AWS region can't be empty", err.Error(), "error message should be 'AWS region can't be empty'")
+				}
+			},
+		},
+		"Valid AWS configuration": {
+			helpers: func() {
+				viper.Set("aws.region", "us-east-1")
+			},
+			testCase: func(t *testing.T, output interface{}, err error) {
+				assert.Nil(t, err, "expected no error to be returned from this function")
+			},
+		},
+	}
+
+	for name, test := range cases {
+		t.Run(name, func(t *testing.T) {
+			test.helpers()
+
+			err := provider.loadConfig()
+			test.testCase(t, nil, err)
+		})
+	}
 }

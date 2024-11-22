@@ -52,7 +52,7 @@ type Credentials struct {
 }
 
 // Call all the functions below in order to properly set the required configs for the cloud provider
-func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig, serviceName string) error {
+func (p *AWS) Initialize(ctx context.Context, serviceName string) error {
 	logger.Log(ctx, "debug", "Loading AWS configurations...")
 	if err := p.loadConfig(); err != nil {
 		return err
@@ -71,8 +71,6 @@ func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig, serviceName s
 		return err
 	}
 	p.Service = service
-
-	cfg.AWS = *p
 
 	return nil
 }
