@@ -52,6 +52,11 @@ func loadAWSConfig() error {
 		return fmt.Errorf("error binding profile_name variable: %w", err)
 	}
 
+	// AWS_PROFILE_PATH env variable
+	if err := viper.BindEnv("profile.path", "AWS_PROFILE_PATH"); err != nil {
+		return fmt.Errorf("error binding profile_path variable: %w", err)
+	}
+
 	// AWS_ACCESS_KEY env variable
 	if err := viper.BindEnv("credentials.access_key", "AWS_ACCESS_KEY"); err != nil {
 		return fmt.Errorf("error binding access_key variable: %w", err)
