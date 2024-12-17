@@ -20,15 +20,13 @@ type ElasticNetworkInterfaceAPI interface {
 func (r *ElasticNetworkInterface) List(ctx context.Context) ([]string, error) {
 	var eniIds []string
 
-	logger.Log(ctx, "debug", "Starting the call to the DescribeNetworkInterfaces API")
+	logger.Log(ctx, "debug", "Starting to list all the ENIs")
 	enis, err := r.API.DescribeNetworkInterfaces(ctx, &ec2.DescribeNetworkInterfacesInput{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error calling the AWS DescribeNetworkInterfaces API: %v", err)
 	}
 
-	logger.Log(ctx, "debug", "Starting to loop through all the ENIs returned by API")
 	for _, eni := range enis.NetworkInterfaces {
-		logger.Log(ctx, "debug", fmt.Sprintf("Appending ENI ID (%v) to list of ENI IDs", *eni.NetworkInterfaceId))
 		eniIds = append(eniIds, *eni.NetworkInterfaceId)
 	}
 
@@ -37,27 +35,29 @@ func (r *ElasticNetworkInterface) List(ctx context.Context) ([]string, error) {
 }
 
 func (r *ElasticNetworkInterface) Validate(ctx context.Context, id string) (bool, error) {
-
-	logger.Log(ctx, "debug", fmt.Sprintf("Starting the call to the DescribeNetworkInterfaces API for ENI: %v", id))
+	logger.Log(ctx, "debug", fmt.Sprintf("Validating ENI: %v", id))
 	enis, err := r.API.DescribeNetworkInterfaces(ctx, &ec2.DescribeNetworkInterfacesInput{NetworkInterfaceIds: []string{id}})
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("error calling the AWS DescribeNetworkInterfaces API: %v", err)
+	}
+
+	if len(enis.NetworkInterfaces) == 0 {
+		logger.Log(ctx, "info", "No ENI found for ID: %v", id)
+		return false, nil
 	}
 
 	status := enis.NetworkInterfaces[0].Status
 	logger.Log(ctx, "debug", fmt.Sprintf("ENI status: %v", status))
 
-	logger.Log(ctx, "debug", fmt.Sprintf("Can the resource be deleted?: %v", status == "available"))
 	logger.Log(ctx, "debug", "Finished validating the ENI")
 	return status == "available", nil
 }
 
 func (r *ElasticNetworkInterface) Delete(ctx context.Context, id string) error {
-
-	logger.Log(ctx, "debug", "Starting to call the DeleteNetworkInterfaces API")
+	logger.Log(ctx, "debug", "Deleting ENI: %v", id)
 	_, err := r.API.DeleteNetworkInterface(ctx, &ec2.DeleteNetworkInterfaceInput{NetworkInterfaceId: &id})
 	if err != nil {
-		return err
+		return fmt.Errorf("error calling the AWS DeleteNetworkInterface API: %v", err)
 	}
 
 	logger.Log(ctx, "debug", "Finished deleting the ENI")

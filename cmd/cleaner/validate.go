@@ -33,6 +33,6 @@ func validate(ctx context.Context, service providers.Cleanable, serviceName stri
 		}
 	}
 
-	logger.Log(ctx, "info", fmt.Sprintf("Validation completed for service: %s", serviceName))
+	logger.Log(ctx, "debug", fmt.Sprintf("Validation completed for service: %s", serviceName))
 	return nil
 }

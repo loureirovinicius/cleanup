@@ -20,15 +20,13 @@ type ElasticIPAPI interface {
 func (r *ElasticIP) List(ctx context.Context) ([]string, error) {
 	var eipsIds []string
 
-	logger.Log(ctx, "debug", "Starting the call to the DescribeAddresses API")
+	logger.Log(ctx, "debug", "Starting to list all the EIPs")
 	eips, err := r.API.DescribeAddresses(ctx, &ec2.DescribeAddressesInput{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error calling the AWS DescribeAddresses API: %v", err)
 	}
 
-	logger.Log(ctx, "debug", "Starting to loop through all the EIPs returned by API")
 	for _, eip := range eips.Addresses {
-		logger.Log(ctx, "debug", fmt.Sprintf("Appending Allocation ID (%v) to list of EIPs", *eip.AllocationId))
 		eipsIds = append(eipsIds, *eip.AllocationId)
 	}
 
@@ -41,23 +39,26 @@ func (r *ElasticIP) Validate(ctx context.Context, id string) (bool, error) {
 	logger.Log(ctx, "debug", fmt.Sprintf("Starting the call to the DescribeAddresses API for EIP: %v", id))
 	eips, err := r.API.DescribeAddresses(ctx, &ec2.DescribeAddressesInput{AllocationIds: []string{id}})
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("error calling the AWS DescribeAddresses API: %v", err)
+	}
+
+	if len(eips.Addresses) == 0 {
+		logger.Log(ctx, "info", "No EIP found for ID: %v", id)
+		return false, nil
 	}
 
 	status := eips.Addresses[0].AssociationId
 	logger.Log(ctx, "debug", fmt.Sprintf("EIP address association ID: %v", status))
 
-	logger.Log(ctx, "debug", fmt.Sprintf("Can the resource be deleted?: %v", status == nil))
 	logger.Log(ctx, "debug", "Finished validating the EIP")
 	return status == nil, nil
 }
 
 func (r *ElasticIP) Delete(ctx context.Context, id string) error {
-
-	logger.Log(ctx, "debug", "Starting to call the ReleaseAddress API")
+	logger.Log(ctx, "debug", "Releasing EIP: %v", id)
 	_, err := r.API.ReleaseAddress(ctx, &ec2.ReleaseAddressInput{AllocationId: &id})
 	if err != nil {
-		return err
+		return fmt.Errorf("error calling the AWS ReleaseAddress API: %v", err)
 	}
 
 	logger.Log(ctx, "debug", "Finished releasing the EIP")

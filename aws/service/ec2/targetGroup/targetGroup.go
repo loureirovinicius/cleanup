@@ -20,15 +20,13 @@ type TargetGroupAPI interface {
 func (r *TargetGroup) List(ctx context.Context) ([]string, error) {
 	var tgArns []string
 
-	logger.Log(ctx, "debug", "Starting the call to the DescribeTargetGroups API")
+	logger.Log(ctx, "debug", "Starting to list all the TargetGroups")
 	tgs, err := r.API.DescribeTargetGroups(ctx, &elasticloadbalancingv2.DescribeTargetGroupsInput{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error calling the AWS DescribeTargetGroups API: %v", err)
 	}
 
-	logger.Log(ctx, "debug", "Starting to loop through all the TGs returned by API")
 	for _, tg := range tgs.TargetGroups {
-		logger.Log(ctx, "debug", fmt.Sprintf("Appending TG ARN (%v) to list of TG ARNs", *tg.TargetGroupArn))
 		tgArns = append(tgArns, *tg.TargetGroupArn)
 	}
 
@@ -37,27 +35,24 @@ func (r *TargetGroup) List(ctx context.Context) ([]string, error) {
 }
 
 func (r *TargetGroup) Validate(ctx context.Context, arn string) (bool, error) {
-
-	logger.Log(ctx, "debug", fmt.Sprintf("Starting the call to the DescribeTargetGroups API for TG: %v", arn))
+	logger.Log(ctx, "debug", fmt.Sprintf("Validating TG: %v", arn))
 	tgs, err := r.API.DescribeTargetGroups(ctx, &elasticloadbalancingv2.DescribeTargetGroupsInput{TargetGroupArns: []string{arn}})
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("error calling the AWS DescribeTargetGroups API: %v", err)
 	}
 
 	lbs := len(tgs.TargetGroups[0].LoadBalancerArns)
-	logger.Log(ctx, "debug", fmt.Sprintf("Listeners for LB (%v): %v", arn, lbs))
+	logger.Log(ctx, "debug", fmt.Sprintf("LBs for TargetGroup (%v): %v", arn, lbs))
 
-	logger.Log(ctx, "debug", fmt.Sprintf("Can the resource be deleted?: %v", lbs == 0))
 	logger.Log(ctx, "debug", "Finished validating the TG")
 	return lbs == 0, nil
 }
 
 func (r *TargetGroup) Delete(ctx context.Context, arn string) error {
-
-	logger.Log(ctx, "debug", "Starting to call the DeleteTargetGroup API")
+	logger.Log(ctx, "debug", "Deleting TG: %v", arn)
 	_, err := r.API.DeleteTargetGroup(ctx, &elasticloadbalancingv2.DeleteTargetGroupInput{TargetGroupArn: &arn})
 	if err != nil {
-		return err
+		return fmt.Errorf("error calling the AWS DeleteTargetGroup API: %v", err)
 	}
 
 	logger.Log(ctx, "debug", "Finished deleting the TG")

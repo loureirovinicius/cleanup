@@ -39,6 +39,6 @@ func delete(ctx context.Context, service providers.Cleanable, serviceName string
 		}
 	}
 
-	logger.Log(ctx, "info", fmt.Sprintf("Deletion completed for service: %s", serviceName))
+	logger.Log(ctx, "debug", fmt.Sprintf("Deletion completed for service: %s", serviceName))
 	return nil
 }
