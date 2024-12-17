@@ -2,12 +2,14 @@ package loadbalancer_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
 	loadbalancer "github.com/loureirovinicius/cleanup/aws/service/ec2/loadBalancer"
+	"github.com/loureirovinicius/cleanup/helpers/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -15,6 +17,10 @@ import (
 // MockEC2 is a mock of EC2 interface
 type MockEC2 struct {
 	mock.Mock
+}
+
+func init() {
+	logger.InitializeLogger("info", "json", os.Stdout)
 }
 
 func (m *MockEC2) DescribeLoadBalancers(ctx context.Context, params *elasticloadbalancingv2.DescribeLoadBalancersInput, optFns ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.DescribeLoadBalancersOutput, error) {

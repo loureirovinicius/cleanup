@@ -1,4 +1,4 @@
-package provider
+package providers
 
 import (
 	"context"
@@ -20,9 +20,8 @@ import (
 )
 
 type AWS struct {
-	config    Config
-	client    *aws.Config
-	Resources map[string]Cleanable
+	config  Config
+	Service Cleanable
 }
 
 type Config struct {
@@ -52,29 +51,32 @@ type Credentials struct {
 	SecretKey string
 }
 
-func (p *AWS) Initialize(ctx context.Context, cfg *ProviderConfig) error {
+// Call all the functions below in order to properly set the required configs for the cloud provider
+func (p *AWS) Initialize(ctx context.Context, serviceName string) error {
 	logger.Log(ctx, "debug", "Loading AWS configurations...")
-	err := p.loadConfig()
-	if err != nil {
+	if err := p.loadConfig(); err != nil {
 		return err
 	}
 	logger.Log(ctx, "debug", "AWS configs were loaded successfully!")
 
 	logger.Log(ctx, "debug", "Creating AWS client...")
-	err = p.createClient(ctx)
+	client, err := p.createClient(ctx)
 	if err != nil {
 		return err
 	}
 	logger.Log(ctx, "debug", "AWS client was created successfully!")
 
-	p.Resources = p.loadServices(ctx)
-
-	cfg.AWS = *p
+	service, err := p.loadService(ctx, client, serviceName)
+	if err != nil {
+		return err
+	}
+	p.Service = service
 
 	return nil
 }
 
-func (p *AWS) createClient(ctx context.Context) error {
+// Create a client for performing API calls
+func (p *AWS) createClient(ctx context.Context) (*aws.Config, error) {
 	credentials := credentials.NewStaticCredentialsProvider(p.config.Credentials.AccessKey, p.config.Credentials.SecretKey, "")
 
 	config, err := config.LoadDefaultConfig(ctx,
@@ -84,14 +86,13 @@ func (p *AWS) createClient(ctx context.Context) error {
 		config.WithCredentialsProvider(credentials),
 	)
 	if err != nil {
-		return fmt.Errorf("error creating AWS client: %v", err)
+		return nil, fmt.Errorf("error creating AWS client: %v", err)
 	}
 
-	p.client = &config
-
-	return nil
+	return &config, nil
 }
 
+// Read configs set by Viper
 func (p *AWS) loadConfig() error {
 	region := viper.GetString("aws.region")
 	if region == "" {
@@ -120,17 +121,25 @@ func (p *AWS) loadConfig() error {
 	return nil
 }
 
-func (p *AWS) loadServices(ctx context.Context) map[string]Cleanable {
-	ec2API := ec2.NewFromConfig(*p.client)
-	logger.Log(ctx, "debug", "EC2 Configs initialized...")
-	elbAPI := elasticloadbalancingv2.NewFromConfig(*p.client)
-	logger.Log(ctx, "debug", "ELB Configs initialized...")
+// Load the cloud provider's services
+func (p *AWS) loadService(ctx context.Context, client *aws.Config, service string) (Cleanable, error) {
+	ec2API := ec2.NewFromConfig(*client)
+	elbAPI := elasticloadbalancingv2.NewFromConfig(*client)
 
-	return map[string]Cleanable{
-		"targetGroup":  &targetgroup.TargetGroup{API: elbAPI},
-		"loadBalancer": &loadbalancer.LoadBalancer{API: elbAPI},
-		"eni":          &elasticnetworkinterface.ElasticNetworkInterface{API: ec2API},
-		"eip":          &elasticip.ElasticIP{API: ec2API},
-		"ebs":          &elasticblockstorage.ElasticBlockStorage{API: ec2API},
+	logger.Log(ctx, "debug", fmt.Sprintf("Initializing AWS service for: %s", service))
+
+	switch service {
+	case "targetGroup":
+		return &targetgroup.TargetGroup{API: elbAPI}, nil
+	case "loadBalancer":
+		return &loadbalancer.LoadBalancer{API: elbAPI}, nil
+	case "eni":
+		return &elasticnetworkinterface.ElasticNetworkInterface{API: ec2API}, nil
+	case "eip":
+		return &elasticip.ElasticIP{API: ec2API}, nil
+	case "ebs":
+		return &elasticblockstorage.ElasticBlockStorage{API: ec2API}, nil
+	default:
+		return nil, fmt.Errorf("service %s is not supported", service)
 	}
 }

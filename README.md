@@ -22,14 +22,14 @@ Everything can be packaged into a single binary that can run on serverless struc
 config.yaml
 ```yaml
 aws:
-  region: # AWS Region
+  region: # AWS Region (AWS_REGION environment variable equivalent)
   authentication:
     profile:
-      name: # AWS Profile name (optional)
-      path: # AWS Config file path (optional)
+      name: # AWS Profile name (AWS_PROFILE_NAME environment variable equivalent)
+      path: # AWS Config file path (AWS_PROFILE_PATH environment variable equivalent)
     credentials:
-      access_key: # AWS Access Key (optional)
-      secret_key: # AWS Secret Key (optional)
+      access_key: # AWS Access Key (AWS_ACCESS_KEY environment variable equivalent)
+      secret_key: # AWS Secret Key (AWS_SECRET_KEY environment variable equivalent)
 ```
 
 2. Compile or run it using Docker or Go:
@@ -56,9 +56,14 @@ aws:
 
 3. Use it:
 ```bash
-cleanup list --service targetGroup
-cleanup validate --service targetGroup
-cleanup delete --service targetGroup
+cleanup list targetGroup
+cleanup validate targetGroup
+cleanup delete targetGroup
+```
+
+4. Get help if required:
+```bash
+cleanup help
 ```
 
 ## License
