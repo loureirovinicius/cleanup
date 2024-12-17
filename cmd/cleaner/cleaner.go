@@ -99,6 +99,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&provider, "provider", "p", "aws", "Cloud Provider being used during execution")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "Enables debug mode")
 	rootCmd.PersistentFlags().StringVarP(&output, "output", "o", "text", "Chooses between output format (text or JSON)")
+	rootCmd.PersistentFlags().BoolP("help", "h", false, "Display help information")
 	rootCmd.AddCommand(listCommand, validateCommand, deleteCommand)
 }
 
@@ -139,12 +140,12 @@ func Run() error {
 	logger.InitializeLogger(level, output, os.Stdout)
 
 	// Start initialization of configuration
-	logger.Log(ctx, "info", "Initializing configs...")
+	logger.Log(ctx, "debug", "Initializing configs...")
 	err = config.Start(provider)
 	if err != nil {
 		return fmt.Errorf("could not initialize configs: %w", err)
 	}
-	logger.Log(ctx, "info", "Configs were initialized successfully!")
+	logger.Log(ctx, "debug", "Configs were initialized successfully!")
 
 	return rootCmd.Execute()
 }
